@@ -23,16 +23,17 @@ public class MainGameSpace implements Screen {
 
     private long startCurrentTime;
 
-    private final int HEIGHT = 80;
-    private final int WIDTH = 80;
+    private final int HEIGHT = 71;
+    private final int WIDTH = 71;
+    private final int spacing = 2;
 
     public MainGameSpace(final MyGdxGame game){
         this.game = game;
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 150, 150);
 
-        for (int y = 0; y < HEIGHT; y++){
-            for (int x = 0; x < WIDTH; x++){
+        for (int y = 0; y < HEIGHT * spacing; y += spacing){
+            for (int x = 0; x < WIDTH * spacing; x += spacing){
                 spawnCell(x, y);
             }
         }
@@ -44,7 +45,12 @@ public class MainGameSpace implements Screen {
             @Override
             public boolean touchDown(int x, int y, int pointer, int button) {
                 for (Cell cell : cells){
-                    if(cell.x == (x / 4) && cell.y == ((600 - y) / 4)){
+                    if(
+                            cell.x == (x / 4) && cell.y == ((600 - y) / 4) ||
+                            cell.x + 1 == (x / 4) && cell.y == ((600 - y) / 4) ||
+                            cell.x == (x / 4) && cell.y + 1 == ((600 - y) / 4) ||
+                            cell.x + 1 == (x / 4) && cell.y + 1 == ((600 - y) / 4)
+                    ){
                         cell.alive = !cell.alive;
                         cell.thisCycle = true;
                         break;
@@ -59,7 +65,13 @@ public class MainGameSpace implements Screen {
             @Override public boolean touchDragged(int x, int y, int i2) {
                 if (mouseDown){
                     for (Cell cell : cells){
-                        if(cell.x == (x / 4) && cell.y == ((600 - y) / 4) && !cell.thisCycle){
+                        if(!cell.thisCycle &&
+                                (cell.x == (x / 4) && cell.y == ((600 - y) / 4) ||
+                                        cell.x + 1 == (x / 4) && cell.y == ((600 - y) / 4) ||
+                                        cell.x == (x / 4) && cell.y + 1 == ((600 - y) / 4) ||
+                                        cell.x + 1 == (x / 4) && cell.y + 1 == ((600 - y) / 4)
+                                )
+                        ){
                             cell.alive = !cell.alive;
                             cell.thisCycle = true;
                             return true;
@@ -86,6 +98,11 @@ public class MainGameSpace implements Screen {
             cell.live();
             game.batch.draw(cell.cellTexture, cell.x, cell.y);
         }
+
+        game.font.draw(game.batch, "" + fps, 0, 150);
+        game.batch.end();
+        countRenders++;
+
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
             q = !q;
@@ -122,10 +139,6 @@ public class MainGameSpace implements Screen {
             }
         }
 
-        game.font.draw(game.batch, "" + fps, 40, 110);
-        game.batch.end();
-        countRenders++;
-
         long finishCurrentTime = System.currentTimeMillis();
         if(finishCurrentTime - startCurrentTime >= 1000){
             startCurrentTime = finishCurrentTime;
@@ -146,14 +159,14 @@ public class MainGameSpace implements Screen {
             for (Cell cell1 : cells) {
                 if (cell1.alive) {
                     if (
-                            (cell.x - 1 == cell1.x && cell.y == cell1.y) ||
-                                    (cell.x - 1 == cell1.x && cell.y + 1 == cell1.y) ||
-                                    (cell.x == cell1.x && cell.y + 1 == cell1.y) ||
-                                    (cell.x + 1 == cell1.x && cell.y + 1 == cell1.y) ||
-                                    (cell.x + 1 == cell1.x && cell.y == cell1.y) ||
-                                    (cell.x + 1 == cell1.x && cell.y - 1 == cell1.y) ||
-                                    (cell.x == cell1.x && cell.y - 1 == cell1.y) ||
-                                    (cell.x - 1 == cell1.x && cell.y - 1 == cell1.y)
+                            (cell.x - spacing == cell1.x && cell.y == cell1.y) ||
+                                    (cell.x - spacing == cell1.x && cell.y + spacing == cell1.y) ||
+                                    (cell.x == cell1.x && cell.y + spacing == cell1.y) ||
+                                    (cell.x + spacing == cell1.x && cell.y + spacing == cell1.y) ||
+                                    (cell.x + spacing == cell1.x && cell.y == cell1.y) ||
+                                    (cell.x + spacing == cell1.x && cell.y - spacing == cell1.y) ||
+                                    (cell.x == cell1.x && cell.y - spacing == cell1.y) ||
+                                    (cell.x - spacing == cell1.x && cell.y - spacing == cell1.y)
                     ) {
                         cell.neighbors++;
                     }
