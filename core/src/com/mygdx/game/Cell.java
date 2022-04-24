@@ -1,19 +1,19 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import static com.mygdx.game.TexturesCell.*;
+import static com.mygdx.game.WarehouseOfConstants.*;
 
 public class Cell {
-    int x;
-    int y;
+    public int x;
+    public int y;
     public boolean alive;
-    boolean thisCycle;
-    float[] color = new float[] {R, G, B};
+    public boolean thisCycle;
+    public float[] color = new float[] {RED, GREEN, BLUE};
     public Sprite sprite;
-    int neighbors;
+    public int neighbors;
 
     Cell(){
-        sprite = new Sprite (TexturesCell.getDeathTexture(), x, y, 2, 2);
+        sprite = new Sprite (TEXTURE, x, y, SPACING, SPACING);
         neighbors = 0;
     }
 
@@ -24,8 +24,8 @@ public class Cell {
         else {
             sprite.setColor(1, 1 , 1,1);
         }
-        color[0] = R;
-        color[1] = G;
-        color[2] = B;
+        color[0] = RED;
+        color[1] = GREEN;
+        color[2] = BLUE;
     }
 }

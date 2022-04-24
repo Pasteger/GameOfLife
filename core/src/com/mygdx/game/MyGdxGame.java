@@ -1,8 +1,8 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.Game;
 
 public class MyGdxGame extends Game {
 	SpriteBatch batch;
@@ -12,6 +12,7 @@ public class MyGdxGame extends Game {
 	public void create () {
 		batch = new SpriteBatch();
 		font = new BitmapFont();
+		font.getData().setScale(0.5f);
 		this.setScreen(new MainGameSpace(this));
 	}
 

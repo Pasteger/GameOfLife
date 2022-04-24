@@ -1,40 +1,66 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
+import static com.mygdx.game.WarehouseOfConstants.*;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Gdx;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MainGameSpace implements Screen {
     private final MyGdxGame game;
     private final OrthographicCamera camera;
     private final ArrayList<Cell> cells = new ArrayList<>();
+    private final Random random;
 
     private int countRenders;
     private int fps;
     private int lPressed;
     private int pPressed;
+    private int qPressed;
 
     private boolean pause;
     private boolean mouseDown;
 
-    private long startCurrentTime;
+    private long startFPSTime;
+    private long finishFPSTime;
+    private long startAgeTime;
+    private long finishAgeTime;
 
-    private final int HEIGHT = 30;
-    private final int WIDTH = 30;
-    private final int SPACING = 2;
 
-    private final float STEP_WIDTH;
-    private final float STEP_HEIGHT;
+    private int limitationFrames;
+
+    private String gameMode;
+
+    private float STEP_WIDTH;
+    private float STEP_HEIGHT;
+
+    private boolean inputIsSet;
+    private boolean isInput;
+    private boolean preWidthIsInput;
+    private StringBuilder preWidthString;
+    private StringBuilder preHeightString;
+    private int preWidth;
+    private int preHeight;
+    private float fontScale;
 
     public MainGameSpace(final MyGdxGame game){
         this.game = game;
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 150, 150);
+
+        camera.setToOrtho(false, VIEWPORT, VIEWPORT);
+
+        preWidthString = new StringBuilder();
+        preHeightString = new StringBuilder();
+
+        random = new Random();
+
+        limitationFrames = 0;
+
+        gameMode = "Conway";
 
         for (int y = 0; y < HEIGHT * SPACING; y += SPACING){
             for (int x = 0; x < WIDTH * SPACING; x += SPACING){
@@ -43,17 +69,35 @@ public class MainGameSpace implements Screen {
         }
 
         Gdx.input.setInputProcessor(new InputProcessor() {
-            @Override public boolean keyDown(int i) { return false; }
+            @Override public boolean keyDown(int i) {
+                if (isInput && !preWidthIsInput) {
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+                        preWidthIsInput = true;
+                    } else {
+                        preWidthString.append(Input.Keys.toString(i));
+                    }
+                }
+                else if (isInput){
+                    if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)){
+                        inputIsSet = true;
+                        preWidthIsInput = false;
+                    }
+                    else {
+                        preHeightString.append(Input.Keys.toString(i));
+                    }
+                }
+                return false;
+            }
             @Override public boolean keyUp(int i) { return false; }
             @Override public boolean keyTyped(char c) { return false; }
             @Override
             public boolean touchDown(int x, int y, int pointer, int button) {
                 for (Cell cell : cells){
                     if(
-                            cell.x == (x / 4) && cell.y == ((600 - y) / 4) ||
-                            cell.x + 1 == (x / 4) && cell.y == ((600 - y) / 4) ||
-                            cell.x == (x / 4) && cell.y + 1 == ((600 - y) / 4) ||
-                            cell.x + 1 == (x / 4) && cell.y + 1 == ((600 - y) / 4)
+                            cell.x == (int)(x / DISPLACEMENT_COEFFICIENT) && cell.y == (int)((WINDOW_SCALE - y) / DISPLACEMENT_COEFFICIENT) ||
+                            cell.x + 1 == (int)(x / DISPLACEMENT_COEFFICIENT) && cell.y == (int)((WINDOW_SCALE - y) / DISPLACEMENT_COEFFICIENT) ||
+                            cell.x == (int)(x / DISPLACEMENT_COEFFICIENT) && cell.y + 1 == (int)((WINDOW_SCALE - y) / DISPLACEMENT_COEFFICIENT) ||
+                            cell.x + 1 == (int)(x / DISPLACEMENT_COEFFICIENT) && cell.y + 1 == (int)((WINDOW_SCALE - y) / DISPLACEMENT_COEFFICIENT)
                     ){
                         cell.alive = !cell.alive;
                         cell.thisCycle = true;
@@ -70,10 +114,10 @@ public class MainGameSpace implements Screen {
                 if (mouseDown){
                     for (Cell cell : cells){
                         if(!cell.thisCycle &&
-                                (cell.x == (x / 4) && cell.y == ((600 - y) / 4) ||
-                                        cell.x + 1 == (x / 4) && cell.y == ((600 - y) / 4) ||
-                                        cell.x == (x / 4) && cell.y + 1 == ((600 - y) / 4) ||
-                                        cell.x + 1 == (x / 4) && cell.y + 1 == ((600 - y) / 4)
+                                (cell.x == (int)(x / DISPLACEMENT_COEFFICIENT) && cell.y == (int)((WINDOW_SCALE - y) / DISPLACEMENT_COEFFICIENT) ||
+                                        cell.x + 1 == (int)(x / DISPLACEMENT_COEFFICIENT) && cell.y == (int)((WINDOW_SCALE - y) / DISPLACEMENT_COEFFICIENT) ||
+                                        cell.x == (int)(x / DISPLACEMENT_COEFFICIENT) && cell.y + 1 == (int)((WINDOW_SCALE - y) / DISPLACEMENT_COEFFICIENT) ||
+                                        cell.x + 1 == (int)(x / DISPLACEMENT_COEFFICIENT) && cell.y + 1 == (int)((WINDOW_SCALE - y) / DISPLACEMENT_COEFFICIENT)
                                 )
                         ){
                             cell.alive = !cell.alive;
@@ -87,13 +131,20 @@ public class MainGameSpace implements Screen {
             @Override public boolean scrolled(float v, float v1) { return false; }
         });
 
-        startCurrentTime = System.currentTimeMillis();
+        startFPSTime = System.currentTimeMillis();
+        startAgeTime = System.currentTimeMillis();
         STEP_WIDTH = ((float) 1 / (float) (WIDTH / 2)) / 2;
         STEP_HEIGHT = ((float) 1 / (float) (HEIGHT / 2)) / 2;
+
+        fontScale = (float)Math.max(WIDTH, HEIGHT)/100;
+        game.font.getData().setScale(fontScale);
     }
 
     @Override
     public void render(float delta) {
+        finishFPSTime = System.currentTimeMillis();
+        finishAgeTime = System.currentTimeMillis();
+
         Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         camera.update();
@@ -126,15 +177,72 @@ public class MainGameSpace implements Screen {
         }
 
 
-        game.font.draw(game.batch, "" + fps, 0, 150);
+        game.font.draw(game.batch, "fps | gameMode | limitationFrames", 0, VIEWPORT);
+        game.font.draw(game.batch, fps + " | " + gameMode + " | " + (float)limitationFrames/1000, 0, VIEWPORT - fontScale * 16);
+        game.font.draw(game.batch, WIDTH + " | " + HEIGHT + "        " +
+                preWidthString + " | " + preHeightString, 0, VIEWPORT - fontScale * 16 * 2
+        );
         game.batch.end();
         countRenders++;
 
+        if(isInput) {
+            if (!inputIsSet) {
+                return;
+            }
+            try {
+                preWidth = Integer.parseInt(preWidthString.toString());
+                preHeight = Integer.parseInt(preHeightString.toString());
+            } catch (Exception exception) {
+                isInput = false;
+                inputIsSet = false;
+                return;
+            }
+            WIDTH = preWidth;
+            HEIGHT = preHeight;
+
+            VIEWPORT = (int) (Math.max(WIDTH, HEIGHT) * ((float) SPACING + 0.5));
+            DISPLACEMENT_COEFFICIENT = (float) WINDOW_SCALE / VIEWPORT;
+            cells.clear();
+            for (int y = 0; y < HEIGHT * SPACING; y += SPACING) {
+                for (int x = 0; x < WIDTH * SPACING; x += SPACING) {
+                    spawnCell(x, y);
+                }
+            }
+            camera.setToOrtho(false, VIEWPORT, VIEWPORT);
+            STEP_WIDTH = ((float) 1 / (float) (WIDTH / 2)) / 2;
+            STEP_HEIGHT = ((float) 1 / (float) (HEIGHT / 2)) / 2;
+
+            fontScale = (float)Math.max(WIDTH, HEIGHT)/100;
+            game.font.getData().setScale(fontScale);
+
+            isInput = false;
+            inputIsSet = false;
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.T)){
+            isInput = true;
+            preWidthString = new StringBuilder();
+            preHeightString = new StringBuilder();
+            preWidth = 0;
+            preHeight = 0;
+        }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
             pause = !pause;
         }
-        if (pause) live();
+        if (pause && finishAgeTime - startAgeTime >= limitationFrames) {
+            live(gameMode);
+            startAgeTime = finishAgeTime;
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.A)){
+            if(limitationFrames < 999)
+            limitationFrames += 50;
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
+            if(limitationFrames > 0)
+                limitationFrames -= 50;
+        }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.C)){
             clear();
@@ -149,6 +257,13 @@ public class MainGameSpace implements Screen {
                 cell.alive = true;
             }
         }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.W)){
+            for (Cell cell : cells){
+                cell.alive = random.nextBoolean();
+            }
+        }
+
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.O)){
             generateHorizontalLine();
@@ -203,9 +318,27 @@ public class MainGameSpace implements Screen {
             }
         }
 
-        long finishCurrentTime = System.currentTimeMillis();
-        if(finishCurrentTime - startCurrentTime >= 1000){
-            startCurrentTime = finishCurrentTime;
+        if(Gdx.input.isKeyJustPressed(Input.Keys.Q)){
+            if (qPressed == 0){
+                gameMode = "EndOfDeath";
+                qPressed++;
+            }
+            else if (qPressed == 1){
+                gameMode = "Caves";
+                qPressed++;
+            }
+            else if (qPressed == 2){
+                gameMode = "Fractal";
+                qPressed++;
+            }
+            else {
+                gameMode = "Conway";
+                qPressed = 0;
+            }
+        }
+
+        if(finishFPSTime - startFPSTime >= 1000){
+            startFPSTime = finishFPSTime;
             fps = countRenders;
             countRenders = 0;
         }
@@ -218,8 +351,57 @@ public class MainGameSpace implements Screen {
         cells.add(cell);
     }
 
-    private void live(){
-        for (Cell cell : cells){
+    private void live(String gameMode){
+        switch (gameMode) {
+            case "Conway":
+                countingNeighbors();
+                for (Cell cell : cells) {
+                    if (!cell.alive & cell.neighbors == 3) {
+                        cell.alive = true;
+                    } else if (cell.alive & cell.neighbors < 2) {
+                        cell.alive = false;
+                    } else if (cell.alive & cell.neighbors > 3) {
+                        cell.alive = false;
+                    }
+                    cell.neighbors = 0;
+                }
+                break;
+            case "EndOfDeath":
+                countingNeighbors();
+                for (Cell cell : cells) {
+                    if (!cell.alive & cell.neighbors == 3) {
+                        cell.alive = true;
+                    }
+                    cell.neighbors = 0;
+                }
+                break;
+            case "Caves":
+                countingNeighbors();
+                for (Cell cell : cells) {
+                    if (!cell.alive && cell.neighbors > 4) {
+                        cell.alive = true;
+                    } else if (cell.alive && cell.neighbors < 3) {
+                        cell.alive = false;
+                    }
+                    cell.neighbors = 0;
+                }
+                break;
+            case "Fractal":
+                countingNeighbors();
+                for (Cell cell : cells) {
+                    if (!cell.alive && cell.neighbors == 1) {
+                        cell.alive = true;
+                    }
+                    cell.neighbors = 0;
+                }
+                break;
+        }
+    }
+
+
+
+    private void countingNeighbors(){
+        for (Cell cell : cells) {
             for (Cell cell1 : cells) {
                 if (cell1.alive) {
                     if (
@@ -236,18 +418,6 @@ public class MainGameSpace implements Screen {
                     }
                 }
             }
-        }
-        for (Cell cell : cells){
-            if(!cell.alive & cell.neighbors == 3){
-                cell.alive=true;
-            }
-            else if(cell.alive & cell.neighbors < 2){
-                cell.alive=false;
-            }
-            else if(cell.alive & cell.neighbors > 3){
-                cell.alive=false;
-            }
-            cell.neighbors=0;
         }
     }
 
