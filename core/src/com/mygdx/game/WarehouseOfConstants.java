@@ -11,8 +11,8 @@ public class WarehouseOfConstants {
 
     public static final int WINDOW_SCALE = 600;
 
-    public static int WIDTH = 30;
-    public static int HEIGHT = 30;
+    public static int WIDTH = 59;
+    public static int HEIGHT = 59;
 
     public static final int SPACING = 2;
 
