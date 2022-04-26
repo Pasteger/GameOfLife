@@ -211,7 +211,7 @@ public class MainGameSpace implements Screen {
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.H)){
             generateHangar();
-        }
+        }   
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.R)){
             for (Cell cell : cells){
