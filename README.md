@@ -1,7 +1,7 @@
 # GameOfLife. Игра "Жизнь"
 # Игра «Жизнь» (англ. Conway's Game of Life) — клеточный автомат, придуманный английским математиком Джоном Конвеем в 1970 году.
 
-![live.png](https://github.com/Pasteger/GameOfLive/blob/master/screenshots/randome_conway.png)
+![life.png](https://github.com/Pasteger/GameOfLife/blob/master/screenshots/randome_conway.png)
 
 ## Правила
 * Место действия игры — размеченная на клетки ограниченная плоскость.
@@ -44,16 +44,16 @@
 * Q - переключает игровые режимы
 
 ##Скриншоты
-![randome_conway.png](https://github.com/Pasteger/GameOfLive/blob/master/screenshots/randome_conway.png)
-![more.png](https://github.com/Pasteger/GameOfLive/blob/master/screenshots/more.png)
+![randome_conway.png](https://github.com/Pasteger/GameOfLife/blob/master/screenshots/randome_conway.png)
+![more.png](https://github.com/Pasteger/GameOfLife/blob/master/screenshots/more.png)
 
-![lines_1.png](https://github.com/Pasteger/GameOfLive/blob/master/screenshots/lines_1.png)
-![lines_2.png](https://github.com/Pasteger/GameOfLive/blob/master/screenshots/lines_2.png)
-![lines_3.png](https://github.com/Pasteger/GameOfLive/blob/master/screenshots/lines_3.png)
+![lines_1.png](https://github.com/Pasteger/GameOfLife/blob/master/screenshots/lines_1.png)
+![lines_2.png](https://github.com/Pasteger/GameOfLife/blob/master/screenshots/lines_2.png)
+![lines_3.png](https://github.com/Pasteger/GameOfLife/blob/master/screenshots/lines_3.png)
 
-![end_of_death.png](https://github.com/Pasteger/GameOfLive/blob/master/screenshots/end_of_death.png)
-![randome_caves.png](https://github.com/Pasteger/GameOfLive/blob/master/screenshots/randome_caves.png)
-![fractal.png](https://github.com/Pasteger/GameOfLive/blob/master/screenshots/fractal.png)
+![end_of_death.png](https://github.com/Pasteger/GameOfLife/blob/master/screenshots/end_of_death.png)
+![randome_caves.png](https://github.com/Pasteger/GameOfLife/blob/master/screenshots/randome_caves.png)
+![fractal.png](https://github.com/Pasteger/GameOfLife/blob/master/screenshots/fractal.png)
 
 ##Примечание
 Данный проект является небольшим экспериментом во времена скуки и не претендует быть чем-то большим и интересным.
